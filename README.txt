@@ -1,61 +1,41 @@
-LOAD QUEST — FINAL VERSION
+LOAD QUEST — FINAL GARAGE EDITION
 
-WHAT IT IS
-A shipment load tracker designed like a small game.
+WHAT CHANGED
+- The horse theme is now a race car / semi-truck racing game.
+- Hourly target increased from 15 to 20 loads.
+- Daily default goal increased from 100 to 150 loads.
+- The Stable is now the Garage.
+- 12 unlockable rigs are included:
+  Starter Semi
+  Redline Racer
+  Box Truck Blitz
+  Yellow Jacket
+  Interceptor
+  Code Red
+  People Mover
+  Formula Freight
+  Mud Titan
+  Rocket Hauler
+  Alien Dispatch
+  King of Freight
+- Unlocks use harder milestones based on:
+  Lifetime XP
+  Lifetime levels
+  Hourly race wins
+- XP now persists across days.
+- Levels require 100 lifetime XP each.
+- Garage shows lifetime level, lifetime XP, and rigs unlocked.
+- The exact same font stack is forced in both light and dark mode.
+- The race scene now looks like an asphalt race track.
 
-CORE WORKFLOW
-- Press + every time you complete a driver check call or shipment update.
-- Press - to correct an accidental entry.
-- Each update is timestamped.
-- Default estimated time per update is 5 minutes.
-- The main count resets naturally by date because the app totals today's entries.
+UPLOAD
+1. Create or open your load-quest GitHub repository.
+2. Upload every file from this ZIP and replace existing files.
+3. Commit changes.
+4. Wait for GitHub Pages to deploy.
+5. Open the site with:
+   ?v=garage
+6. Refresh once.
+7. Confirm the Garage and race vehicles appear.
 
-GAME FEATURES
-- Hourly horse race to 15 loads.
-- Automatic race reset at the top of every hour.
-- Hourly race win tracking.
-- Horse stable with unlockable racers.
-- XP and levels.
-- Daily load goal.
-- Best hour and hourly streak stats.
-- Confetti, sound, dust, and trophy celebrations.
-
-UNLOCKS
-- Mustang: starter horse
-- Unicorn: 3 race wins
-- Zebra: 7 race wins
-- Ghost Horse: 12 race wins
-- Skeleton Horse: 20 race wins
-- Royal Racer: 30 race wins
-
-NEW REPOSITORY SETUP
-1. Create a new PUBLIC GitHub repository named:
-   load-quest
-2. Unzip this package.
-3. Upload every file from the unzipped folder to the repository root.
-4. Commit the files.
-5. Open Settings → Pages.
-6. Under Build and deployment:
-   Source: Deploy from a branch
-   Branch: main
-   Folder: / (root)
-7. Save and wait about 1–2 minutes.
-8. Open:
-   https://YOUR-USERNAME.github.io/load-quest/
-
-INSTALL ON MAC
-Open the live URL in Safari.
-Choose File → Add to Dock.
-
-INSTALL ON IPHONE
-Open the live URL in Safari.
-Tap Share → Add to Home Screen.
-
-UPDATES
-This final version uses separate index.html, styles.css, and app.js files.
-That makes future changes much safer and easier.
-The service worker checks the network first for new versions.
-
-DATA
-All history, settings, race wins, and horses are stored locally in the browser.
-Use Export to save a JSON backup.
+If the installed app remains old, remove it and add it to the Dock again after confirming the web version updated.

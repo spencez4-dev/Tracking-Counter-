@@ -1,14 +1,14 @@
 
 const STORAGE_KEY = 'loadQuestStateV1';
-const HOURLY_GOAL = 15;
+const HOURLY_GOAL = 20;
 
 const defaults = {
   log: [],
-  dailyGoal: 100,
+  dailyGoal: 150,
   minutesPerUpdate: 5,
   raceWins: 0,
   completedHours: [],
-  selectedHorse: 'mustang',
+  selectedVehicle: 'starter-semi',
   theme: 'light',
   sound: true,
   particles: true
@@ -23,13 +23,19 @@ const $ = id => document.getElementById(id);
 let audioContext;
 let lastHourKey = currentHourKey();
 
-const horses = [
-  { id:'mustang', icon:'🐎', name:'Mustang', rule:'Starter horse', unlocked:s=>true },
-  { id:'unicorn', icon:'🦄', name:'Unicorn', rule:'Win 3 races', unlocked:s=>s.raceWins>=3 },
-  { id:'zebra', icon:'🦓', name:'Zebra', rule:'Win 7 races', unlocked:s=>s.raceWins>=7 },
-  { id:'ghost', icon:'👻', name:'Ghost Horse', rule:'Win 12 races', unlocked:s=>s.raceWins>=12 },
-  { id:'skeleton', icon:'☠️', name:'Skeleton Horse', rule:'Win 20 races', unlocked:s=>s.raceWins>=20 },
-  { id:'royal', icon:'🏇', name:'Royal Racer', rule:'Win 30 races', unlocked:s=>s.raceWins>=30 }
+const vehicles = [
+  { id:'starter-semi', icon:'🚛', name:'Starter Semi', type:'SEMI', rule:'Unlocked from the start', unlocked:s=>true },
+  { id:'red-racer', icon:'🏎️', name:'Redline Racer', type:'RACE CAR', rule:'Reach Level 3', unlocked:s=>lifetimeLevel()>=3 },
+  { id:'box-truck', icon:'🚚', name:'Box Truck Blitz', type:'TRUCK', rule:'Win 5 hourly races', unlocked:s=>s.raceWins>=5 },
+  { id:'taxi', icon:'🚕', name:'Yellow Jacket', type:'STREET', rule:'Reach Level 6', unlocked:s=>lifetimeLevel()>=6 },
+  { id:'police', icon:'🚓', name:'Interceptor', type:'PURSUIT', rule:'Win 12 hourly races', unlocked:s=>s.raceWins>=12 },
+  { id:'fire', icon:'🚒', name:'Code Red', type:'HEAVY', rule:'Reach Level 10', unlocked:s=>lifetimeLevel()>=10 },
+  { id:'bus', icon:'🚌', name:'People Mover', type:'ODDBALL', rule:'Track 500 lifetime loads', unlocked:s=>lifetimeXP()>=500 },
+  { id:'formula', icon:'🏁', name:'Formula Freight', type:'RACE CAR', rule:'Win 25 hourly races', unlocked:s=>s.raceWins>=25 },
+  { id:'monster', icon:'🛻', name:'Mud Titan', type:'OFF-ROAD', rule:'Reach Level 15', unlocked:s=>lifetimeLevel()>=15 },
+  { id:'rocket', icon:'🚀', name:'Rocket Hauler', type:'LEGENDARY', rule:'Track 1,000 lifetime loads', unlocked:s=>lifetimeXP()>=1000 },
+  { id:'ufo', icon:'🛸', name:'Alien Dispatch', type:'MYTHIC', rule:'Reach Level 25', unlocked:s=>lifetimeLevel()>=25 },
+  { id:'crown-semi', icon:'👑', name:'King of Freight', type:'MYTHIC SEMI', rule:'Win 50 hourly races', unlocked:s=>s.raceWins>=50 }
 ];
 
 function save() {
@@ -59,6 +65,19 @@ function todayCount() {
 
 function positiveTodayCount() {
   return todaysEntries().reduce((sum, entry) => sum + Math.max(0, entry.delta), 0);
+}
+
+
+function lifetimeXP() {
+  return state.log.reduce((sum, entry) => sum + Math.max(0, entry.delta), 0);
+}
+
+function lifetimeLevel() {
+  return Math.floor(lifetimeXP() / 100) + 1;
+}
+
+function levelProgress() {
+  return lifetimeXP() % 100;
 }
 
 function hourlyPositiveCount(date = new Date()) {
@@ -96,8 +115,8 @@ function hourlyStreak() {
   return streak;
 }
 
-function selectedHorse() {
-  return horses.find(h => h.id === state.selectedHorse) || horses[0];
+function selectedVehicle() {
+  return vehicles.find(h => h.id === state.selectedVehicle) || vehicles[0];
 }
 
 function secondsUntilNextHour() {
@@ -130,9 +149,9 @@ function render() {
   const positive = positiveTodayCount();
   const hourly = hourlyPositiveCount();
   const raceProgress = Math.min(100, (hourly / HOURLY_GOAL) * 100);
-  const xp = positive;
-  const level = Math.floor(xp / 25) + 1;
-  const levelProgress = xp % 25;
+  const xp = lifetimeXP();
+  const level = lifetimeLevel();
+  const currentLevelProgress = levelProgress();
   const goalPct = Math.min(100, Math.round((positive / Math.max(1, state.dailyGoal)) * 100));
 
   $('mainCount').textContent = current;
@@ -142,32 +161,32 @@ function render() {
 
   $('trackFill').style.width = `${raceProgress}%`;
   $('horse').style.left = `${raceProgress}%`;
-  $('horse').textContent = selectedHorse().icon;
+  $('horse').textContent = selectedVehicle().icon;
   $('horse').classList.toggle('finished', hourly >= HOURLY_GOAL);
   $('raceCount').textContent = `${Math.min(HOURLY_GOAL, hourly)} / ${HOURLY_GOAL}`;
 
   if (hourly >= HOURLY_GOAL) {
-    $('raceMessage').textContent = 'Finish line flattened. Hourly quest complete.';
+    $('raceMessage').textContent = 'Checkered flag claimed. Hourly quest complete.';
   } else if (hourly >= 12) {
-    $('raceMessage').textContent = `${HOURLY_GOAL-hourly} loads left — final furlong.`;
+    $('raceMessage').textContent = `${HOURLY_GOAL-hourly} loads left — final lap.`;
   } else if (hourly >= 8) {
     $('raceMessage').textContent = `${HOURLY_GOAL-hourly} loads left — gaining ground.`;
   } else if (hourly > 0) {
-    $('raceMessage').textContent = `${HOURLY_GOAL-hourly} loads left — off to the races.`;
+    $('raceMessage').textContent = `${HOURLY_GOAL-hourly} loads left — engines are warming up.`;
   } else {
-    $('raceMessage').textContent = 'The gates are open.';
+    $('raceMessage').textContent = 'Green flag. Let it rip.';
   }
 
   $('shiftScore').textContent = xp;
-  $('xpFill').style.width = `${(levelProgress / 25) * 100}%`;
-  $('levelText').textContent = `Level ${level} · ${levelProgress} / 25 XP`;
+  $('xpFill').style.width = `${currentLevelProgress}%`;
+  $('levelText').textContent = `Level ${level} · ${currentLevelProgress} / 100 XP`;
 
   $('goalRing').style.setProperty('--pct', goalPct);
   $('goalPct').textContent = `${goalPct}%`;
   $('goalProgress').textContent = `${positive} / ${state.dailyGoal}`;
 
   $('raceWins').textContent = state.raceWins;
-  $('selectedHorseLabel').textContent = `Riding: ${selectedHorse().name}`;
+  $('selectedVehicleLabel').textContent = `Driving: ${selectedVehicle().name}`;
 
   $('goalInput').value = state.dailyGoal;
   $('minutesInput').value = state.minutesPerUpdate;
@@ -193,28 +212,38 @@ function renderLog() {
 }
 
 function renderStable() {
-  $('stableGrid').innerHTML = horses.map(horse => {
-    const unlocked = horse.unlocked(state);
-    return `
-      <button
-        class="skin-card ${unlocked ? 'unlocked' : ''} ${state.selectedHorse === horse.id ? 'selected' : ''}"
-        type="button"
-        data-horse="${horse.id}"
-        ${unlocked ? '' : 'disabled'}
-      >
-        <span class="skin-icon">${horse.icon}</span>
-        <span class="skin-name">${horse.name}</span>
-        <span class="skin-rule">${horse.rule}</span>
-      </button>
-    `;
-  }).join('');
+  const unlockedCount = vehicles.filter(vehicle => vehicle.unlocked(state)).length;
 
-  document.querySelectorAll('[data-horse]').forEach(button => {
+  $('stableGrid').innerHTML = `
+    <div class="garage-summary" style="grid-column:1/-1">
+      <div class="garage-chip"><span>Lifetime Level</span><strong>${lifetimeLevel()}</strong></div>
+      <div class="garage-chip"><span>Lifetime XP</span><strong>${lifetimeXP()}</strong></div>
+      <div class="garage-chip"><span>Rigs Unlocked</span><strong>${unlockedCount} / ${vehicles.length}</strong></div>
+    </div>
+    ${vehicles.map(vehicle => {
+      const unlocked = vehicle.unlocked(state);
+      return `
+        <button
+          class="skin-card ${unlocked ? 'unlocked' : ''} ${state.selectedVehicle === vehicle.id ? 'selected' : ''}"
+          type="button"
+          data-vehicle="${vehicle.id}"
+          ${unlocked ? '' : 'disabled'}
+        >
+          <span class="skin-icon">${vehicle.icon}</span>
+          <span class="skin-name">${vehicle.name}</span>
+          <span class="skin-type">${vehicle.type}</span>
+          <span class="skin-rule">${vehicle.rule}</span>
+        </button>
+      `;
+    }).join('')}
+  `;
+
+  document.querySelectorAll('[data-vehicle]').forEach(button => {
     button.addEventListener('click', () => {
-      state.selectedHorse = button.dataset.horse;
+      state.selectedVehicle = button.dataset.vehicle;
       save();
       render();
-      showToast(`${selectedHorse().name} selected`);
+      showToast(`${selectedVehicle().name} selected`);
     });
   });
 }
@@ -313,7 +342,7 @@ function fullCelebration() {
   void trophy.offsetWidth;
   trophy.classList.add('show');
 
-  flashWord('PHOTO FINISH!');
+  flashWord('CHECKERED FLAG!');
   particleBurst($('horse'), 95, 2.5);
   [0, 90, 180, 280].forEach(delay => setTimeout(() => tone('plus', true), delay));
 }
