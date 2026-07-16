@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f1e8">
+  <meta name="description" content="A whimsical shipment load tracker with hourly races, streaks, stats, and timestamp logs.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Load Quest</title>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">WAYFINDER ARCADE</div>
+        <h1>Load Quest</h1>
+      </div>
+      <div class="top-actions">
+        <button id="themeBtn" class="icon-btn" type="button" aria-label="Toggle dark mode">☾</button>
+        <button id="settingsBtn" class="icon-btn" type="button" aria-label="Open settings">⚙</button>
+      </div>
+    </header>
+
+    <section class="hero card">
+      <div class="hero-copy">
+        <span class="status-pill">TODAY'S LOAD BOARD</span>
+        <div id="mainCount" class="main-count" aria-live="polite">0</div>
+        <div class="main-label">loads tracked today</div>
+        <div id="heroMessage" class="hero-message">The dispatch board awaits.</div>
+      </div>
+
+      <div class="counter-controls">
+        <button id="minusBtn" class="count-btn minus" type="button" aria-label="Remove one load">−</button>
+        <button id="plusBtn" class="count-btn plus" type="button" aria-label="Track one load">+</button>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="mini-stat">
+          <span>Estimated work</span>
+          <strong id="timeEstimate">0 min</strong>
+        </div>
+        <div class="mini-stat">
+          <span>Best hour</span>
+          <strong id="bestHour">0 loads</strong>
+        </div>
+        <div class="mini-stat">
+          <span>Hourly streak</span>
+          <strong id="hourStreak">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="race card">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">HOURLY QUEST</span>
+          <h2>Race to 15</h2>
+        </div>
+        <div id="hourCountdown" class="timer-pill">59:59</div>
+      </div>
+
+      <div class="race-scene">
+        <div class="sun"></div>
+        <div class="cloud cloud-one"></div>
+        <div class="cloud cloud-two"></div>
+        <div class="hills"></div>
+        <div class="fence"></div>
+        <div class="track">
+          <div id="trackFill" class="track-fill"></div>
+          <div id="horse" class="horse" role="img" aria-label="Running horse">🐎</div>
+          <div class="finish-line"></div>
+          <div class="finish-flag">🏁</div>
+        </div>
+        <div id="trophy" class="trophy">🏆</div>
+      </div>
+
+      <div class="race-footer">
+        <div>
+          <strong id="raceCount">0 / 15</strong>
+          <span id="raceMessage">The gates are open.</span>
+        </div>
+        <button id="stableBtn" class="secondary-btn" type="button">Stable</button>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="card stat-panel">
+        <span class="eyebrow">SHIFT SCORE</span>
+        <div id="shiftScore" class="score">0</div>
+        <div class="score-label">XP earned today</div>
+        <div class="xp-track"><div id="xpFill" class="xp-fill"></div></div>
+        <div id="levelText" class="small-note">Level 1 · 0 / 25 XP</div>
+      </article>
+
+      <article class="card stat-panel">
+        <span class="eyebrow">DAILY GOAL</span>
+        <div class="goal-row">
+          <div id="goalRing" class="goal-ring"><span id="goalPct">0%</span></div>
+          <div>
+            <strong id="goalProgress">0 / 100</strong>
+            <div class="small-note">loads tracked</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card stat-panel">
+        <span class="eyebrow">RACE RECORD</span>
+        <div id="raceWins" class="score">0</div>
+        <div class="score-label">hourly races won</div>
+        <div id="selectedHorseLabel" class="small-note">Riding: Mustang</div>
+      </article>
+    </section>
+
+    <section class="card log-panel">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">RECENT UPDATES</span>
+          <h2>Load Log</h2>
+        </div>
+        <div class="log-actions">
+          <button id="undoBtn" class="secondary-btn" type="button">Undo</button>
+          <button id="exportBtn" class="secondary-btn" type="button">Export</button>
+        </div>
+      </div>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <div id="fx" class="fx" aria-hidden="true"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="megaWord" class="mega-word">PHOTO FINISH!</div>
+  <div class="build-badge">LOAD QUEST · FINAL</div>
+
+  <dialog id="stableDialog">
+    <div class="dialog-inner">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">YOUR STABLE</span>
+          <h2>Choose Your Racer</h2>
+        </div>
+      </div>
+      <div id="stableGrid" class="stable-grid"></div>
+      <div class="dialog-actions">
+        <button id="closeStable" class="primary-btn" type="button">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="settingsDialog">
+    <div class="dialog-inner">
+      <span class="eyebrow">SETTINGS</span>
+      <h2>Quest Controls</h2>
+
+      <label class="setting-row">
+        <span>Daily load goal</span>
+        <input id="goalInput" type="number" min="1" max="1000" step="1">
+      </label>
+
+      <label class="setting-row">
+        <span>Minutes per update</span>
+        <input id="minutesInput" type="number" min="1" max="60" step="1">
+      </label>
+
+      <div class="setting-row">
+        <span>Sound effects</span>
+        <button id="soundToggle" class="switch" type="button" role="switch" aria-checked="true"></button>
+      </div>
+
+      <div class="setting-row">
+        <span>Particles</span>
+        <button id="particlesToggle" class="switch" type="button" role="switch" aria-checked="true"></button>
+      </div>
+
+      <div class="setting-row">
+        <span>Import backup</span>
+        <button id="importBtn" class="secondary-btn" type="button">Choose file</button>
+        <input id="importInput" type="file" accept="application/json" hidden>
+      </div>
+
+      <div class="dialog-actions">
+        <button id="resetBtn" class="danger-btn" type="button">Reset all data</button>
+        <button id="closeSettings" class="primary-btn" type="button">Save</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
