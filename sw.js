@@ -1,4 +1,4 @@
-const CACHE = 'load-quest-garage-v2';
+const CACHE = 'load-quest-garage-v3-net-score';
 const CORE = [
   './',
   './index.html',

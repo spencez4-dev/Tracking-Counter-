@@ -64,12 +64,12 @@ function todayCount() {
 }
 
 function positiveTodayCount() {
-  return todaysEntries().reduce((sum, entry) => sum + Math.max(0, entry.delta), 0);
+  return Math.max(0, todaysEntries().reduce((sum, entry) => sum + entry.delta, 0));
 }
 
 
 function lifetimeXP() {
-  return state.log.reduce((sum, entry) => sum + Math.max(0, entry.delta), 0);
+  return Math.max(0, state.log.reduce((sum, entry) => sum + entry.delta, 0));
 }
 
 function lifetimeLevel() {
@@ -82,23 +82,23 @@ function levelProgress() {
 
 function hourlyPositiveCount(date = new Date()) {
   const key = currentHourKey(date);
-  return state.log.reduce((sum, entry) => {
+  return Math.max(0, state.log.reduce((sum, entry) => {
     if (currentHourKey(new Date(entry.time)) !== key) return sum;
-    return sum + Math.max(0, entry.delta);
-  }, 0);
+    return sum + entry.delta;
+  }, 0));
 }
 
 function hourlyTotalsToday() {
   const totals = {};
   for (const entry of todaysEntries()) {
     const key = currentHourKey(new Date(entry.time));
-    totals[key] = (totals[key] || 0) + Math.max(0, entry.delta);
+    totals[key] = (totals[key] || 0) + entry.delta;
   }
   return totals;
 }
 
 function bestHour() {
-  return Math.max(0, ...Object.values(hourlyTotalsToday()));
+  return Math.max(0, ...Object.values(hourlyTotalsToday()).map(total => Math.max(0, total)));
 }
 
 function hourlyStreak() {
@@ -379,7 +379,7 @@ function changeLoad(delta) {
 
   const messages = delta > 0
     ? ['Load secured.', 'Driver updated.', 'Another one on the board.', 'Dispatch magic.', 'Momentum acquired.']
-    : ['Load removed.', 'Board corrected.', 'Update reversed.'];
+    : ['Load removed.', 'All scores corrected.', 'Load removed everywhere.'];
 
   $('heroMessage').textContent = messages[Math.floor(Math.random() * messages.length)];
 
@@ -393,12 +393,14 @@ function changeLoad(delta) {
     dustBurst();
     maybeCompleteRace();
 
-    const positive = positiveTodayCount();
-    if (positive === state.dailyGoal) {
+    const netLoads = positiveTodayCount();
+    if (netLoads === state.dailyGoal) {
       flashWord('SHIFT GOAL CRUSHED!');
       particleBurst($('mainCount'), 100, 2.4);
       showToast('Daily load goal complete');
     }
+  } else {
+    showToast('Load removed from every score');
   }
 }
 
